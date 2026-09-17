@@ -22,9 +22,11 @@ public final class Amounts {
                     + "(?:Rs\\.?|INR)\\s*([0-9,]+\\.[0-9]{2})",
             Pattern.CASE_INSENSITIVE);
 
-    /** The transaction amount: the first rupee figure in the message. */
+    /** The transaction amount: the first rupee figure in the message, ignoring balance/limits. */
     public static BigDecimal first(String body) {
-        Matcher m = AMOUNT.matcher(body);
+        // Strip out balance or limit fields first to prevent them from being parsed as transaction amounts
+        String cleaned = BALANCE.matcher(body).replaceAll("");
+        Matcher m = AMOUNT.matcher(cleaned);
         if (!m.find()) return null;
         return toDecimal(m.group(1));
     }
